@@ -1,0 +1,23 @@
+{
+  "name": "PoC Intercept Twitter API auth",
+  "version": "1.0",
+  "description": "Intercept auth tokens used on twitter",
+  "permissions": [
+    "webRequest",
+    "https://*.twitter.com/"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.twitter.com/*"
+      ],
+      "js": [
+        "twitter-content.js"
+      ]
+    }
+  ],
+  "manifest_version": 2
+}
