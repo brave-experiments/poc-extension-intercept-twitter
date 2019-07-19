@@ -21,7 +21,8 @@ async function getTweetDetails (tweetId) {
     },
     referrerPolicy: "no-referrer-when-downgrade",
     method: "GET",
-    mode: "cors"
+    mode: "cors",
+    redirect: "follow"
   })
   const result = await response.json()
   console.log('got result', result)

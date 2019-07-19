@@ -1,4 +1,4 @@
-const twitterAuthHeaders = {
+let twitterAuthHeaders = {
 }
 const twitterAuthHeaderNames = [
   'authorization',
@@ -6,11 +6,33 @@ const twitterAuthHeaderNames = [
   'x-guest-token',
 ]
 console.log('adding listener')
+
+let lastSessionId
+
+var re = new RegExp('');
+const authTokenCookieRegex = /[; ]_twitter_sess=([^\s;]*)/
+function readSessionCookie(cookiesString) {
+  var match = cookiesString.match(authTokenCookieRegex);
+  if (match) return unescape(match[1]);
+  return null;
+}
+
 chrome.webRequest.onSendHeaders.addListener(
   function({ requestHeaders }) {  
     console.log('Intercepted api request', requestHeaders)
+    requestHeaders
     if (requestHeaders) {
       for (const header of requestHeaders) {
+        if (header.name === 'Cookie') {
+          const currentSessionId = readSessionCookie(header.value)
+          const hasAuthChanged = (currentSessionId !== lastSessionId)
+          if (hasAuthChanged) {
+            // clear cached auth data
+            lastSessionId = currentSessionId
+            twitterAuthHeaders = { }
+          }
+          console.log('got session', { currentSessionId, lastSessionId, hasAuthChanged })
+        }
         if (twitterAuthHeaderNames.includes(header.name) || header.name.startsWith('x-twitter-')) {
           console.log('Received authorization header', header)
           twitterAuthHeaders[header.name] = header.value
@@ -26,7 +48,8 @@ chrome.webRequest.onSendHeaders.addListener(
   },
   // extra
   [
-    'requestHeaders'
+    'requestHeaders',
+    'extraHeaders'
   ]);
 
 
@@ -36,5 +59,7 @@ chrome.webRequest.onSendHeaders.addListener(
     }
   })
 
+  // Monitor when twitter auth changes, and clear saved auth
 
+  // `_twitter_sess`
   
